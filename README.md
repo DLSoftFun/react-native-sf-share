@@ -1,9 +1,9 @@
-# react-native-sf-share
+# react-native-sf-ums
 
 # 分享
 
 # 安装
-> npm i react-native-sf-share
+> npm i react-native-sf-ums
 
 1. 将 " umlibs " 下载放入工程target(就在GitHub上!)
 2. 导入  
