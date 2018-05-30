@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
 {
   //UM初始化
   [UMConfigure setLogEnabled:YES];
-  [RNUMConfigure initWithAppkey:@"5ac479118f4a9d4acf0000f5" channel:@"App Store"];
+  [RNUMConfigure initWithAppkey:@"" channel:@"App Store"];
   //UM打印
   [UMCommonLogManager setUpUMCommonLogManager];
   //UM统计
