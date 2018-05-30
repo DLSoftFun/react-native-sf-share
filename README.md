@@ -259,3 +259,212 @@ const styles = StyleSheet.create({
 
 
 ```
+
+# 客户端 
+```
+/**
+ * Copyright (c) 2015-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+#import "AppDelegate.h"
+#import <React/RCTBundleURLProvider.h>
+#import <React/RCTRootView.h>
+#import <React/RCTLinkingManager.h>
+
+#import <UMCommonLog/UMCommonLogHeaders.h>
+#import <UMAnalytics/MobClick.h>
+#import <UMPush/UMessage.h>
+#import <UMShare/UMShare.h>
+#import <UserNotifications/UserNotifications.h>
+#import "RNUMConfigure.h"
+
+
+@interface AppDelegate ()<UNUserNotificationCenterDelegate>
+
+@end
+
+@implementation AppDelegate
+
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  //UM初始化
+  [UMConfigure setLogEnabled:YES];
+  [RNUMConfigure initWithAppkey:@"5ac479118f4a9d4acf0000f5" channel:@"App Store"];
+  //UM打印
+  [UMCommonLogManager setUpUMCommonLogManager];
+  //UM统计
+  [MobClick setScenarioType:E_UM_NORMAL];
+
+  
+  // Push's basic setting
+  UMessageRegisterEntity * entity = [[UMessageRegisterEntity alloc] init];
+  //type是对推送的几个参数的选择，可以选择一个或者多个。默认是三个全部打开，即：声音，弹窗，角标
+  entity.types = UMessageAuthorizationOptionBadge|UMessageAuthorizationOptionAlert;
+  [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+  
+  [UMessage registerForRemoteNotificationsWithLaunchOptions:launchOptions Entity:entity completionHandler:^(BOOL granted, NSError * _Nullable error) {
+    if (granted) {
+    } else {
+    }
+  }];
+  
+  [self configUSharePlatforms];
+  [self confitUShareSettings];
+  
+  NSURL *jsCodeLocation;
+
+  jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+
+  RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
+                                                      moduleName:@"um"
+                                               initialProperties:nil
+                                                   launchOptions:launchOptions];
+  rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
+
+  self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  UIViewController *rootViewController = [UIViewController new];
+  rootViewController.view = rootView;
+  self.window.rootViewController = rootViewController;
+  [self.window makeKeyAndVisible];
+  
+  return YES;
+}
+- (void)confitUShareSettings
+{
+  /*
+   * 打开图片水印
+   */
+  //[UMSocialGlobal shareInstance].isUsingWaterMark = YES;
+  /*
+   * 关闭强制验证https，可允许http图片分享，但需要在info.plist设置安全域名
+   <key>NSAppTransportSecurity</key>
+   <dict>
+   <key>NSAllowsArbitraryLoads</key>
+   <true/>
+   </dict>
+   */
+  [UMSocialGlobal shareInstance].isUsingHttpsWhenShareContent = NO;
+}
+- (void)configUSharePlatforms
+{
+  /* 设置微信的appKey和appSecret */
+ 
+  [[UMSocialManager defaultManager] setPlaform:UMSocialPlatformType_WechatSession appKey:@"wx852d43a16b2af151" appSecret:@"423f56cbcdd97217a44352805cb1f410" redirectURL:@"http://mobile.umeng.com/social"];
+  /*
+   * 移除相应平台的分享，如微信收藏
+   */
+  //[[UMSocialManager defaultManager] removePlatformProviderWithPlatformTypes:@[@(UMSocialPlatformType_WechatFavorite)]];
+  /* 设置分享到QQ互联的appID
+   * U-Share SDK为了兼容大部分平台命名，统一用appKey和appSecret进行参数设置，而QQ平台仅需将appID作为U-Share的appKey参数传进即可。
+   */
+ 
+  [[UMSocialManager defaultManager] setPlaform:UMSocialPlatformType_QQ appKey:@"1104484470"/*设置QQ平台的appID*/  appSecret:nil redirectURL:@"http://mobile.umeng.com/social"];
+
+  /* 设置新浪的appKey和appSecret */
+  [[UMSocialManager defaultManager] setPlaform:UMSocialPlatformType_Sina appKey:@"1601664396"  appSecret:nil redirectURL:@"https://sns.whalecloud.com/sina2/callback"];
+}
+#pragma mark - Share
+//#define __IPHONE_10_0    100000
+#if __IPHONE_OS_VERSION_MAX_ALLOWED > 100000
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
+{
+  //6.3的新的API调用，是为了兼容国外平台(例如:新版facebookSDK,VK等)的调用[如果用6.2的api调用会没有回调],对国内平台没有影响。
+  BOOL result = [[UMSocialManager defaultManager]  handleOpenURL:url options:options];
+  if (!result) {
+    // 其他如支付等SDK的回调
+  }
+  return result;
+}
+#endif
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+  //6.3的新的API调用，是为了兼容国外平台(例如:新版facebookSDK,VK等)的调用[如果用6.2的api调用会没有回调],对国内平台没有影响
+  BOOL result = [[UMSocialManager defaultManager] handleOpenURL:url sourceApplication:sourceApplication annotation:annotation];
+  if (!result) {
+    // 其他如支付等SDK的回调
+  }
+  return result;
+}
+
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
+{
+  BOOL result = [[UMSocialManager defaultManager] handleOpenURL:url];
+  if (!result) {
+    // 其他如支付等SDK的回调
+  }
+  return result;
+}
+
+#pragma mark - Push
+
+//允许的话 自动回调的函数
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+  
+  //将device token转换为字符串
+  NSString *deviceTokenStr = [NSString stringWithFormat:@"%@",deviceToken];
+  
+  
+  //modify the token, remove the  "<, >"
+  NSLog(@"    deviceTokenStr  lentgh:  %lu  ->%@", (unsigned long)[deviceTokenStr length], [[deviceTokenStr substringWithRange:NSMakeRange(0, 72)] substringWithRange:NSMakeRange(1, 71)]);
+  deviceTokenStr = [[deviceTokenStr substringWithRange:NSMakeRange(0, 72)] substringWithRange:NSMakeRange(1, 71)];
+  
+  NSLog(@"deviceTokenStr = %@",deviceTokenStr);
+  
+  
+  //将deviceToken保存在NSUserDefaults
+
+  
+}
+
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+
+  //关闭友盟自带的弹出框
+  [UMessage setAutoAlert:NO];
+  [UMessage didReceiveRemoteNotification:userInfo];
+}
+
+//iOS10新增：处理前台收到通知的代理方法
+-(void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler{
+  NSDictionary * userInfo = notification.request.content.userInfo;
+  if([notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
+    
+    //应用处于前台时的远程推送接受
+    //关闭友盟自带的弹出框
+    [UMessage setAutoAlert:NO];
+    //必须加这句代码
+    [UMessage didReceiveRemoteNotification:userInfo];
+    
+  }else{
+    //应用处于前台时的本地推送接受
+  }
+  completionHandler(UNNotificationPresentationOptionSound|UNNotificationPresentationOptionBadge|UNNotificationPresentationOptionAlert);
+}
+
+//iOS10新增：处理后台点击通知的代理方法
+-(void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)())completionHandler{
+  NSDictionary * userInfo = response.notification.request.content.userInfo;
+  if([response.notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
+    
+    //应用处于后台时的远程推送接受
+    //必须加这句代码
+    [UMessage didReceiveRemoteNotification:userInfo];
+    
+  }else{
+    //应用处于后台时的本地推送接受
+  }
+}
+
+@end
+```
+
+
