@@ -9,21 +9,14 @@
 2. 导入  
 ```
  libsqlite3.tbd
-CoreGraphics.framework
-SystemConfiguration.framework
-CoreTelephony.framework
-libsqlite3.tbd
-libc++.tbd
-libz.tbd
-SystemConfiguration.framework
-libc++.tbd
-Photos.framework
-SystemConfiguration.framework
-CoreTelephony.framework
-ImageIO.framework
-libsqlite3.tbd
-libz.tbd 
-Photos.framework
+ CoreGraphics.framework
+ SystemConfiguration.framework
+ CoreTelephony.framework
+ libsqlite3.tbd
+ libc++.tbd
+ libz.tbd
+ Photos.framework
+ ImageIO.framework
 ```
 
 
