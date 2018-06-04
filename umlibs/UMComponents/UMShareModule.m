@@ -249,6 +249,16 @@ RCT_EXPORT_METHOD(auth:(NSInteger)platform completion:(RCTResponseSenderBlock)co
       }
     }
   }];
+}
+
+RCT_EXPORT_METHOD(isInstall:(NSInteger)platform completion:(RCTResponseSenderBlock)completion){
+  if ([[UMSocialManager defaultManager] isInstall:platform]) {
+    completion(@[[NSNull null], @"1"]);
+  }
+  else {
+    completion(@[[NSNull null], @"0"]);
+  }
   
 }
+
 @end
