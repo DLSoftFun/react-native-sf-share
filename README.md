@@ -192,13 +192,7 @@ import {
     View
 } from 'react-native';
 import SFUM from 'react-native-sf-share'
-
-const instructions = Platform.select({
-    ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-    android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+import SFUmShareUI from "./SFUmShareUI";
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -206,27 +200,44 @@ export default class App extends Component<Props> {
         return (
             <View
                 style={styles.container}>
+
                 <Text
                     style={styles.welcome}
                     onPress={this.click}>
                     Welcome to React
                     Native!
                 </Text>
-                <Text
-                    style={styles.instructions}>
-                    To get started, edit
-                    App.js
-                </Text>
-                <Text
-                    style={styles.instructions}>
-                    {instructions}
-                </Text>
+
+                <Text style={{fontSize:20,marginLeft:50,marginTop:100}} onPress={this.clicks}>{'112132131'}</Text>
+
+                <SFUmShareUI
+                    ref={(ref) => this.share = ref}
+                    onShare={(i) => this.clickItem(i)}
+                    platArray={['QQ','WechatSession','WechatTimeLine','WechatFavorite','Qzone','Facebook']}/>
+
             </View>
         );
     }
 
+    clickItem = (i) =>{
+        var dic = {
+            index: i,
+            img :  'http://kplan.oss-cn-shanghai.aliyuncs.com/header/2017-11-27_1511778896586',
+            text: 'text',
+            url:  'http://kplan.oss-cn-shanghai.aliyuncs.com/header/2017-11-27_1511778896586',
+            title: 'title',
+        }
+        this.share.setParams(dic, (data) =>{
+            this.share.setVisiable(false)
+        })
+    }
+
     componentWillMount() {
 
+    }
+
+    clicks = () =>{
+        this.share.setVisiable(true);
     }
 
     click = () => {
@@ -234,14 +245,15 @@ export default class App extends Component<Props> {
             'http://kplan.oss-cn-shanghai.aliyuncs.com/header/2017-11-27_1511778896586',
             'http://kplan.oss-cn-shanghai.aliyuncs.com/header/2017-11-27_1511778896586',
             'saa');
+
+        // SFUM.share()
+
     }
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#F5FCFF',
     },
     welcome: {
@@ -249,13 +261,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         margin: 10,
     },
-    instructions: {
-        textAlign: 'center',
-        color: '#333333',
-        marginBottom: 5,
-    },
-});
 
+});
 
 
 ```
